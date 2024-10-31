@@ -18,8 +18,13 @@ tasks.register("clean", Delete) {
 }
 
 buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
     dependencies {
         // Otras dependencias
-        classpath 'com.google.gms:google-services:4.4.2' // Asegúrate de tener la última versión
+        classpath 'com.android.tools.build:gradle:7.0.4' // Asegúrate de usar la versión correcta de Gradle
+        classpath 'com.google.gms:google-services:4.4.2' // Versión de google-services
     }
 }
