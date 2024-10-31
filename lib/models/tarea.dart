@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
 
 class Tarea {
   String idTarea;
@@ -45,14 +47,49 @@ class Tarea {
       idTarea: map['id_tarea'] ?? Uuid().v4(),
       nombreTarea: map['nombre_tarea'] ?? '',
       estadoSincronizacion: map['estado_sincronizacion'] ?? "pendiente",
-      fechaCreacion: (map['fecha_creacion'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      ultimaActualizacion: (map['ultima_actualizacion'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      fechaCreacion:
+          (map['fecha_creacion'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      ultimaActualizacion:
+          (map['ultima_actualizacion'] as Timestamp?)?.toDate() ??
+              DateTime.now(),
       usuarioCreador: map['usuario_creador'] ?? '',
       actividades: (map['actividades'] as List<dynamic>? ?? [])
           .map((actividadMap) => Actividad.fromMap(actividadMap))
           .toList(),
       ubicacion: map['ubicacion'],
       notas: map['notas'],
+    );
+  }
+
+  String toJson() {
+    return jsonEncode({
+      'idTarea': idTarea,
+      'nombreTarea': nombreTarea,
+      'fechaCreacion': fechaCreacion.toIso8601String(),
+      'ultimaActualizacion': ultimaActualizacion.toIso8601String(),
+      'usuarioCreador': usuarioCreador,
+      'actividades': actividades.map((a) => a.toJson()).toList(),
+      'estadoSincronizacion': estadoSincronizacion,
+      'ubicacion': ubicacion,
+      'notas': notas,
+    });
+  }
+
+  static Tarea fromJson(String source) {
+    final data = json.decode(source);
+
+    return Tarea(
+      idTarea: data['idTarea'],
+      nombreTarea: data['nombreTarea'],
+      fechaCreacion: DateTime.parse(data['fechaCreacion']),
+      ultimaActualizacion: DateTime.parse(data['ultimaActualizacion']),
+      usuarioCreador: data['usuarioCreador'],
+      actividades: (data['actividades'] as List)
+          .map((actividad) => Actividad.fromMap(actividad))
+          .toList(),
+      estadoSincronizacion: data['estadoSincronizacion'],
+      ubicacion: data['ubicacion'],
+      notas: data['notas'],
     );
   }
 }
@@ -65,6 +102,8 @@ class Actividad {
   String horaInicio;
   String horaFin;
   String duracion;
+  TextEditingController horaInicioController;
+  TextEditingController horaFinController;
 
   Actividad({
     required this.idActividad,
@@ -73,7 +112,8 @@ class Actividad {
     required this.horaInicio,
     required this.horaFin,
     required this.duracion,
-  });
+  })  : horaInicioController = TextEditingController(),
+        horaFinController = TextEditingController();
 
   // Método para serializar a Map para Firebase
   Map<String, dynamic> toMap() {
@@ -97,5 +137,16 @@ class Actividad {
       horaFin: map['hora_fin'] ?? '',
       duracion: map['duracion'] ?? '',
     );
+  }
+
+  String toJson() {
+    return jsonEncode({
+      'id_actividad': idActividad,
+      'descripcion_actividad': descripcionActividad,
+      'estado': estado,
+      'hora_inicio': horaInicio,
+      'hora_fin': horaFin,
+      'duracion': duracion,
+    });
   }
 }

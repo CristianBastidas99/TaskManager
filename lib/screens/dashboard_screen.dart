@@ -179,21 +179,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             SizedBox(height: 10),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: _createExampleTarea,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue, // Background color
-                  foregroundColor: Colors.white, // Text color
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  textStyle:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/task_form');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue, // Background color
+                    foregroundColor: Colors.white, // Text color
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    textStyle:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
+                  icon: Icon(Icons.add, size: 24),
+                  label: Text("Crear Tarea"),
                 ),
-                child: Text("Crear Nueva Tarea"),
               ),
             ),
           ],
