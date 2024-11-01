@@ -72,7 +72,7 @@ Para generar un APK de producción:
 2. El archivo APK se encontrará en `build/app/outputs/flutter-apk/app-release.apk`.
 
 ### Acceso al APK en GitHub
-También puedes encontrar el APK en la sección [Releases](https://github.com/usuario/taskmanager-flutter/releases) del repositorio. Aquí se cargará una nueva versión del APK cada vez que se actualice la aplicación.
+También puedes encontrar el APK en la sección [Releases](https://github.com/CristianBastidas99/app_tareas_conectividad_limitada/releases) del repositorio. Aquí se cargará una nueva versión del APK cada vez que se actualice la aplicación.
 
 ## Estructura de Almacenamiento en Firebase Firestore
 Los formularios de tareas se almacenan en la colección `formularios_tareas` dentro de Firebase Firestore, utilizando la siguiente estructura de datos para organizar y sincronizar las actividades:
