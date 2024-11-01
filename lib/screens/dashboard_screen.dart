@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:uuid/uuid.dart';
 
 import '../models/tarea.dart'; // Asegúrate de importar la clase Tarea
 
 class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
+
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
 }
@@ -75,48 +76,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  // Crea una tarea de ejemplo en Firestore
-  void _createExampleTarea() async {
-    final nuevaTarea = Tarea(
-      idTarea: Uuid().v4(),
-      nombreTarea: 'Inspección de equipo',
-      fechaCreacion: DateTime.now(),
-      ultimaActualizacion: DateTime.now(),
-      usuarioCreador: _auth.currentUser?.email ?? 'codeaunitest',
-      actividades: [
-        Actividad(
-          idActividad: Uuid().v4(),
-          descripcionActividad: 'Revisión de cables',
-          estado: 'pendiente',
-          horaInicio: '08:30',
-          horaFin: '09:00',
-          duracion: '30 mins',
-        ),
-      ],
-      estadoSincronizacion: 'pendiente',
-      ubicacion: 'Planta A',
-      notas: 'Revisar nuevamente en 3 meses',
-    );
-
-    print(nuevaTarea.toMap());
-
-    await _firestore
-        .collection('formularios_tareas')
-        .doc(nuevaTarea.idTarea)
-        .set(nuevaTarea.toMap());
-
-    // Recarga las tareas después de añadir una nueva
-    _fetchTareas();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dashboard'),
+        title: const Text('Dashboard'),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: _logout,
             tooltip: 'Cerrar sesión',
           ),
@@ -127,7 +94,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            DrawerHeader(
+            const DrawerHeader(
               decoration: BoxDecoration(
                 color: Colors.blue,
               ),
@@ -137,18 +104,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.qr_code_scanner),
-              title: Text('Escanear QR'),
+              leading: const Icon(Icons.qr_code_scanner),
+              title: const Text('Escanear QR'),
               onTap: () => Navigator.pushNamed(context, '/qr_scanner'),
             ),
             ListTile(
-              leading: Icon(Icons.file_download),
-              title: Text('Exportar datos'),
+              leading: const Icon(Icons.file_download),
+              title: const Text('Exportar datos'),
               onTap: () => Navigator.pushNamed(context, '/export_data'),
             ),
             ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Ajustes'),
+              leading: const Icon(Icons.settings),
+              title: const Text('Ajustes'),
               onTap: () => Navigator.pushNamed(context, '/settings'),
             ),
           ],
@@ -178,9 +145,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Align(
                 alignment: Alignment.centerRight,
                 child: ElevatedButton.icon(
@@ -190,15 +157,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue, // Background color
                     foregroundColor: Colors.white, // Text color
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     textStyle:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  icon: Icon(Icons.add, size: 24),
-                  label: Text("Crear Tarea"),
+                  icon: const Icon(Icons.add, size: 24),
+                  label: const Text("Crear Tarea"),
                 ),
               ),
             ),

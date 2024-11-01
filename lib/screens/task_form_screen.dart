@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:uuid/uuid.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/tarea.dart';
+import '../services/storage_service.dart';
 
 class TaskFormScreen extends StatefulWidget {
+  const TaskFormScreen({super.key});
+
   @override
   _TaskFormScreenState createState() => _TaskFormScreenState();
 }
 
 class _TaskFormScreenState extends State<TaskFormScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  bool _isOnline = true;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nombreTareaController = TextEditingController();
   final TextEditingController _ubicacionController = TextEditingController();
   final TextEditingController _notasController = TextEditingController();
-  List<Actividad> _actividades = [];
+  final List<Actividad> _actividades = [];
+  final StorageService _storageService = StorageService();
 
   Future<void> _selectTime(
       BuildContext context, bool isFirstTime, Actividad actividad) async {
@@ -45,34 +44,12 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   @override
   void initState() {
     super.initState();
-    _checkConnectivity();
-  }
-
-  void _checkConnectivity() async {
-    Connectivity().onConnectivityChanged.listen((result) {
-      _updateConnectivityStatus(result != ConnectivityResult.none);
-      if (_isOnline) {
-        _syncLocalTasks();
-      }
-    });
-  }
-
-  void _updateConnectivityStatus(bool isOnline) {
-    setState(() {
-      _isOnline = isOnline;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(_isOnline ? 'Conectado' : 'Sin conexión'),
-        backgroundColor: _isOnline ? Colors.green : Colors.red,
-      ),
-    );
   }
 
   void _addActividad() {
     setState(() {
       _actividades.add(Actividad(
-        idActividad: Uuid().v4(),
+        idActividad: const Uuid().v4(),
         descripcionActividad: '',
         estado: 'pendiente',
         horaInicio: '',
@@ -85,54 +62,23 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   void _saveTask() async {
     if (_formKey.currentState?.validate() ?? false) {
       final nuevaTarea = Tarea(
-        idTarea: Uuid().v4(),
+        idTarea: const Uuid().v4(),
         nombreTarea: _nombreTareaController.text,
         fechaCreacion: DateTime.now(),
         ultimaActualizacion: DateTime.now(),
-        usuarioCreador: _auth.currentUser?.email ?? 'codeaunitest',
+        usuarioCreador: _storageService.isOnline
+            ? (_auth.currentUser?.email ?? 'unknown')
+            : 'codeaunitest',
         actividades: _actividades,
-        estadoSincronizacion: _isOnline ? 'sincronizada' : 'pendiente',
+        estadoSincronizacion:
+            _storageService.isOnline ? 'sincronizada' : 'pendiente',
         ubicacion: _ubicacionController.text,
         notas: _notasController.text,
       );
 
-      try {
-        if (_isOnline) {
-          await _firestore
-              .collection('formularios_tareas')
-              .doc(nuevaTarea.idTarea)
-              .set(nuevaTarea.toMap());
-        } else {
-          await _saveTaskLocally(nuevaTarea);
-        }
-        Navigator.pop(context, nuevaTarea);
-      } catch (error) {
-        print("Error al guardar la tarea: $error");
-        await _saveTaskLocally(nuevaTarea);
-      }
+      await _storageService.saveTask(nuevaTarea);
+      Navigator.pushReplacementNamed(context, '/dashboard');
     }
-  }
-
-  Future<void> _saveTaskLocally(Tarea tarea) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> tareasLocales = prefs.getStringList('tareas') ?? [];
-    tareasLocales.add(tarea.toJson());
-    await prefs.setStringList('tareas', tareasLocales);
-  }
-
-  Future<void> _syncLocalTasks() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> tareasLocales = prefs.getStringList('tareas') ?? [];
-
-    for (String tareaJson in tareasLocales) {
-      Tarea tarea = Tarea.fromJson(tareaJson);
-      try {
-        await _firestore.collection('tareas').add(tarea.toMap());
-      } catch (error) {
-        print("Error al sincronizar tarea: $error");
-      }
-    }
-    await prefs.remove('tareas');
   }
 
   void _calculateDuration(Actividad actividad) {
@@ -169,6 +115,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
       if (end.isBefore(start) || end.isAtSameMomentAs(start)) {
         setState(() {
           actividad.duracion = '';
+          actividad.duracionController.text = '';
         });
         return;
       }
@@ -183,8 +130,11 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
         if (hours > 0) {
           actividad.duracion =
               "$hours horas ${minutes > 0 ? 'y $minutes minutos' : ''}";
+          actividad.duracionController.text =
+              "$hours horas ${minutes > 0 ? 'y $minutes minutos' : ''}";
         } else {
           actividad.duracion = "$minutes minutos";
+          actividad.duracionController.text = "$minutes minutos";
         }
       });
     }
@@ -194,7 +144,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Crear Nueva Tarea'),
+        title: const Text('Crear Nueva Tarea'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -204,7 +154,8 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
             children: [
               TextFormField(
                 controller: _nombreTareaController,
-                decoration: InputDecoration(labelText: 'Nombre de la Tarea'),
+                decoration:
+                    const InputDecoration(labelText: 'Nombre de la Tarea'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor, ingrese el nombre de la tarea';
@@ -214,40 +165,41 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
               ),
               TextFormField(
                 controller: _ubicacionController,
-                decoration: InputDecoration(labelText: 'Ubicación'),
+                decoration: const InputDecoration(labelText: 'Ubicación'),
               ),
               TextFormField(
                 controller: _notasController,
-                decoration: InputDecoration(labelText: 'Notas'),
+                decoration: const InputDecoration(labelText: 'Notas'),
               ),
-              SizedBox(height: 20),
-              Text(
+              const SizedBox(height: 20),
+              const Text(
                 'Actividades',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               ..._actividades.map((actividad) {
                 int index = _actividades.indexOf(actividad);
                 return _buildActividadForm(actividad, index);
-              }).toList(),
-              SizedBox(height: 10),
+              }),
+              const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: _addActividad,
-                child: Text('Agregar Actividad'),
+                child: const Text('Agregar Actividad'),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _saveTask,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  textStyle:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  textStyle: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text('Guardar Tarea'),
+                child: const Text('Guardar Tarea'),
               ),
             ],
           ),
@@ -257,19 +209,20 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   }
 
   Widget _buildActividadForm(Actividad actividad, int index) {
-
     @override
-  void dispose() {
-    actividad.horaInicioController.dispose();
-    actividad.horaFinController.dispose();
-    super.dispose();
-  }
+    void dispose() {
+      actividad.horaInicioController.dispose();
+      actividad.horaFinController.dispose();
+      actividad.duracionController.dispose();
+      super.dispose();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextFormField(
-          decoration: InputDecoration(labelText: 'Descripción de la Actividad'),
+          decoration:
+              const InputDecoration(labelText: 'Descripción de la Actividad'),
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Por favor, ingrese una descripción para la actividad';
@@ -285,7 +238,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
           decoration: InputDecoration(
             labelText: 'Hora de Inicio',
             suffixIcon: IconButton(
-              icon: Icon(Icons.access_time),
+              icon: const Icon(Icons.access_time),
               onPressed: () => _selectTime(context, true, actividad),
             ),
           ),
@@ -296,19 +249,20 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
           decoration: InputDecoration(
             labelText: 'Hora de Fin',
             suffixIcon: IconButton(
-              icon: Icon(Icons.access_time),
+              icon: const Icon(Icons.access_time),
               onPressed: () => _selectTime(context, false, actividad),
             ),
           ),
         ),
         TextFormField(
+          controller: actividad.duracionController,
           readOnly: true,
           decoration: InputDecoration(
             labelText: 'Duración',
             hintText: actividad.duracion,
           ),
         ),
-        Divider(color: Colors.grey),
+        const Divider(color: Colors.blue),
       ],
     );
   }

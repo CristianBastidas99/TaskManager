@@ -24,7 +24,7 @@ class Tarea {
     required this.actividades,
     this.ubicacion,
     this.notas,
-  }) : idTarea = idTarea ?? Uuid().v4();
+  }) : idTarea = idTarea ?? const Uuid().v4();
 
   // Método para serializar a Map para Firebase
   Map<String, dynamic> toMap() {
@@ -32,8 +32,8 @@ class Tarea {
       'id_tarea': idTarea,
       'nombre_tarea': nombreTarea,
       'estado_sincronizacion': estadoSincronizacion,
-      'fecha_creacion': fechaCreacion,
-      'ultima_actualizacion': ultimaActualizacion,
+      'fecha_creacion': fechaCreacion.toIso8601String(),
+      'ultima_actualizacion': ultimaActualizacion.toIso8601String(),
       'usuario_creador': usuarioCreador,
       'actividades': actividades.map((actividad) => actividad.toMap()).toList(),
       if (ubicacion != null) 'ubicacion': ubicacion,
@@ -43,19 +43,36 @@ class Tarea {
 
   // Constructor desde Map (Firebase)
   factory Tarea.fromMap(Map<String, dynamic> map) {
+    DateTime parseDate(dynamic date) {
+      if (date is Timestamp) {
+        return date.toDate();
+      } else if (date is String) {
+        return DateTime.tryParse(date) ?? DateTime.now();
+      }
+      return DateTime.now();
+    }
+
     return Tarea(
-      idTarea: map['id_tarea'] ?? Uuid().v4(),
+      idTarea: map['id_tarea'] ?? const Uuid().v4(),
       nombreTarea: map['nombre_tarea'] ?? '',
       estadoSincronizacion: map['estado_sincronizacion'] ?? "pendiente",
-      fechaCreacion:
-          (map['fecha_creacion'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      ultimaActualizacion:
-          (map['ultima_actualizacion'] as Timestamp?)?.toDate() ??
-              DateTime.now(),
+      fechaCreacion: parseDate(map['fecha_creacion']),
+      ultimaActualizacion: parseDate(map['ultima_actualizacion']),
       usuarioCreador: map['usuario_creador'] ?? '',
-      actividades: (map['actividades'] as List<dynamic>? ?? [])
-          .map((actividadMap) => Actividad.fromMap(actividadMap))
-          .toList(),
+      actividades: (map['actividades'] as List<dynamic>?)
+            ?.map((actividadMap) {
+              // Validar que cada actividad es un mapa
+              if (actividadMap is Map<String, dynamic>) {
+                return Actividad.fromMap(actividadMap);
+              } else {
+                print('Actividad no es un mapa: $actividadMap');
+                return null; // O manejar de otra manera
+              }
+            })
+            .where((actividad) => actividad != null)
+            .cast<Actividad>()
+            .toList() ??
+        [],
       ubicacion: map['ubicacion'],
       notas: map['notas'],
     );
@@ -104,6 +121,7 @@ class Actividad {
   String duracion;
   TextEditingController horaInicioController;
   TextEditingController horaFinController;
+  TextEditingController duracionController;
 
   Actividad({
     required this.idActividad,
@@ -113,7 +131,8 @@ class Actividad {
     required this.horaFin,
     required this.duracion,
   })  : horaInicioController = TextEditingController(),
-        horaFinController = TextEditingController();
+        horaFinController = TextEditingController(),
+        duracionController = TextEditingController();
 
   // Método para serializar a Map para Firebase
   Map<String, dynamic> toMap() {
@@ -130,7 +149,7 @@ class Actividad {
   // Constructor desde Map (Firebase)
   factory Actividad.fromMap(Map<String, dynamic> map) {
     return Actividad(
-      idActividad: map['id_actividad'] ?? Uuid().v4(),
+      idActividad: map['id_actividad'] ?? const Uuid().v4(),
       descripcionActividad: map['descripcion_actividad'] ?? '',
       estado: map['estado'] ?? "pendiente",
       horaInicio: map['hora_inicio'] ?? '',
