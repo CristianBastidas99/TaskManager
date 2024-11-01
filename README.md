@@ -1,6 +1,4 @@
-Aquí tienes un `README.md` completo para la aplicación Flutter, con detalles adicionales asumidos para hacerla más realista. Incluye todas las secciones necesarias para que cualquier persona que vea el repositorio entienda el propósito, funcionalidades, configuración, y dónde encontrar el APK.
 
-```markdown
 # TaskManager - Aplicación de Gestión de Tareas
 
 ## Descripción
@@ -53,11 +51,7 @@ Para clonar y ejecutar esta aplicación localmente, sigue estos pasos:
    flutter pub get
    ```
 
-3. Configura Firebase:
-   - Dirígete a la [consola de Firebase](https://firebase.google.com/) e integra Firebase Authentication y Firebase Firestore en el proyecto.
-   - Agrega el archivo `google-services.json` para Android en la carpeta `android/app`.
-
-4. Ejecuta la aplicación:
+3. Ejecuta la aplicación:
    ```bash
    flutter run
    ```
@@ -140,12 +134,11 @@ Este proyecto está bajo la licencia MIT. Para más detalles, consulta el archiv
 
 ## Contacto
 Desarrollado por: Cristian Bastidas  
-Correo electrónico: cbastidasobregon@gmail.com 
+Correo electrónico: cbastidasobregon@gmail.com
 GitHub: https://github.com/CristianBastidas99
 
 ---
 ¡Gracias por utilizar TaskManager! Esperamos que te sea útil para gestionar y organizar tus tareas eficientemente.
-```
 
 ### Notas Adicionales
 
