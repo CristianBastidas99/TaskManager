@@ -139,11 +139,3 @@ GitHub: https://github.com/CristianBastidas99
 
 ---
 ¡Gracias por utilizar TaskManager! Esperamos que te sea útil para gestionar y organizar tus tareas eficientemente.
-
-### Notas Adicionales
-
-- **Estructura Clara**: Cada sección está separada para facilitar la lectura y navegación.
-- **Contactos y Licencia**: Se incluyen datos de contacto y la licencia para darle un toque profesional.
-- **Pasos Detallados**: Las instrucciones para instalación, generación del APK y uso de Firebase ayudan a que cualquier desarrollador pueda replicar el entorno de desarrollo.
-  
-Este `README.md` cubre todos los aspectos que se necesitan para comprender y colaborar en el proyecto.
