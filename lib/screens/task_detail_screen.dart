@@ -21,7 +21,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   // Método para actualizar el estado de la actividad
   Future<void> _toggleActivityCompletion(Actividad actividad) async {
     setState(() {
-      actividad.estado = (actividad.estado == 'completada') ? 'pendiente' : 'completada';
+      actividad.estado =
+          (actividad.estado == 'completada') ? 'pendiente' : 'completada';
     });
     await _storageService.saveTask(widget.tarea);
     ScaffoldMessenger.of(context).showSnackBar(
@@ -32,33 +33,56 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   }
 
   // Método para generar el código QR y mostrar el diálogo
-  Future<void> _showQRCodeDialog() async {
+  void _showQRCodeDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Código QR de la Tarea"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              QrImageView(
-                data: widget.tarea.idTarea,
-                size: 200.0,
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: _saveQRCodeAsImage,
-                icon: const Icon(Icons.download),
-                label: const Text("Guardar QR"),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cerrar"),
+          title: Text('Código QR'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Container(
+                  width: 200, 
+                  height: 200,
+                  child: QrImageView(
+                    data: widget.tarea.idTarea,
+                    size: 200.0,
+                  ),
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                    onPressed: () async {
+                      await _saveQRCodeAsImage();
+                    },
+                    icon: Icon(Icons.save_alt),
+                    label: Text('Guardar'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
+                    ),
+                    SizedBox(width: 10), 
+                    ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    icon: Icon(Icons.close),
+                    label: Text('Cerrar'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey,
+                      foregroundColor: Colors.white,
+                    ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
@@ -75,16 +99,16 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         emptyColor: Colors.white,
       );
 
-      final picData = await qrValidationStatus.toImageData(2048, format: ui.ImageByteFormat.png);
+      final picData = await qrValidationStatus.toImageData(2048,
+          format: ui.ImageByteFormat.png);
 
       if (picData != null) {
         // Guardar la imagen como archivo temporal
         final Uint8List pngBytes = picData.buffer.asUint8List();
-        final success = await ImageSave.saveImage(
-            pngBytes,
+        final success = await ImageSave.saveImage(pngBytes,
             "${widget.tarea.idTarea}.png", // Asegúrate de incluir la extensión
             albumName: "Tareas" // Nombre del álbum en el que guardar la imagen
-        );
+            );
 
         if (success != null && success) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -161,6 +185,4 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       ),
     );
   }
-
-
 }
