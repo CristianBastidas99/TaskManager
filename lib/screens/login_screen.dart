@@ -1,6 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:email_validator/email_validator.dart';
+import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
+import '../utils/validators.dart';
+import '../utils/constants.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,42 +12,26 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final AuthService _authService = AuthService();
   final TextEditingController _emailController =
-      TextEditingController(text: 'codeaunitest@example.com');
+      TextEditingController(text: 'operario3@example.com ');
   final TextEditingController _passwordController =
-      TextEditingController(text: 'Codea123test');
+      TextEditingController(text: '123456');
   bool _isLoading = false;
   String? _errorMessage;
   bool _obscureText = true;
 
-  // Input validation methods
-  bool _validateEmail(String email) => EmailValidator.validate(email);
-
-  bool _validatePassword(String password) => password.length >= 6;
-
-  // Mapping Firebase error messages
-  String _mapFirebaseError(String errorCode) {
-    switch (errorCode) {
-      case 'user-not-found':
-        return 'Usuario no encontrado.';
-      case 'wrong-password':
-        return 'Contraseña incorrecta.';
-      case 'invalid-email':
-        return 'Correo electrónico inválido.';
-      default:
-        return 'Error en el inicio de sesión. Intente nuevamente.';
-    }
-  }
-
   Future<void> _login() async {
-    if (!_validateEmail(_emailController.text.trim())) {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (!Validators.validateEmail(email)) {
       setState(() {
         _errorMessage = 'Correo electrónico inválido.';
       });
       return;
     }
-    if (!_validatePassword(_passwordController.text.trim())) {
+    if (!Validators.validatePassword(password)) {
       setState(() {
         _errorMessage = 'La contraseña debe tener al menos 6 caracteres.';
       });
@@ -58,14 +44,11 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await _auth.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-      Navigator.pushReplacementNamed(context, '/dashboard');
+      await _authService.login(email, password);
+      Navigator.pushReplacementNamed(context, dashboardRoute);
     } catch (e) {
       setState(() {
-        _errorMessage = _mapFirebaseError((e as FirebaseAuthException).code);
+        _errorMessage = _authService.mapFirebaseError((e as FirebaseAuthException).code);
         _isLoading = false;
       });
     }
@@ -84,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'Bienvenido',
+                    welcomeMessage,
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),

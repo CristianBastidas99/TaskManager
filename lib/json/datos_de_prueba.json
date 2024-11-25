@@ -1,0 +1,196 @@
+{
+    "mina": [
+        {
+            "id": "d290f1ee-6c54-4b01-90e6-d701748f0851",
+            "nombre": "Mina El Dorado"
+        },
+        {
+            "id": "e320f1ee-7a64-4c02-90f7-e801749f0862",
+            "nombre": "Mina San Cristóbal"
+        },
+        {
+            "id": "f330f1ee-8b74-4d03-90f8-f901750f0873",
+            "nombre": "Mina La Esmeralda"
+        }
+    ],
+    "labor": [
+        {
+            "id": "a010f1ee-6c54-4b01-90e6-d701748f0881",
+            "nombre": "Excavación"
+        },
+        {
+            "id": "a020f1ee-6c54-4b01-90e6-d701748f0882",
+            "nombre": "Cargue de material"
+        },
+        {
+            "id": "a030f1ee-6c54-4b01-90e6-d701748f0883",
+            "nombre": "Transporte de material"
+        },
+        {
+            "id": "a040f1ee-6c54-4b01-90e6-d701748f0884",
+            "nombre": "Nivelación del terreno"
+        },
+        {
+            "id": "a050f1ee-6c54-4b01-90e6-d701748f0885",
+            "nombre": "Compactación"
+        },
+        {
+            "id": "a060f1ee-6c54-4b01-90e6-d701748f0886",
+            "nombre": "Mantenimiento preventivo"
+        },
+        {
+            "id": "a070f1ee-6c54-4b01-90e6-d701748f0887",
+            "nombre": "Revisión de seguridad"
+        }
+    ],
+    "equipo": [
+        {
+            "id": "a230f1ee-1b34-4c01-12a2-c301740f0111",
+            "nombre": "Excavadora CAT 320",
+            "id_mina": "d290f1ee-6c54-4b01-90e6-d701748f0851",
+            "sub_equipos": [
+                "MC-1234AB5",
+                "EQP-XYZ987",
+                "TOOL-456DEF",
+                "MOD-GHI789"
+            ],
+            "horometro": 1345.6
+        },
+        {
+            "id": "b231f1ee-2c44-4c02-23b3-d302740f0222",
+            "nombre": "Camión Volvo FMX",
+            "id_mina": "e320f1ee-7a64-4c02-90f7-e801749f0862",
+            "sub_equipos": [
+                "MACH-789GHI",
+                "ROBO-JKL321",
+                "UNIT-PQR654",
+                "ASSY-DEF456"
+            ],
+            "horometro": 2456.3
+        },
+        {
+            "id": "c232f1ee-3d54-4c03-34c4-e403740f0333",
+            "nombre": "Bulldozer Komatsu D65",
+            "id_mina": "f330f1ee-8b74-4d03-90f8-f901750f0873",
+            "sub_equipos": [
+                "SYS-STU012",
+                "COMP-VWX789",
+                "DEV-YZ045",
+                "PART-ABC123"
+            ],
+            "horometro": 1870.4
+        }
+    ],
+    "usuario": [
+        {
+            "id": "u001f1ee-6c54-4b01-90e6-d701748f1001",
+            "username": "operario1",
+            "email": "operario1@example.com",
+            "tipo": "operario",
+            "id_equipo": "a230f1ee-1b34-4c01-12a2-c301740f0111"
+        },
+        {
+            "id": "u002f1ee-6c54-4b01-90e6-d701748f1002",
+            "username": "operario2",
+            "email": "operario2@example.com",
+            "tipo": "operario",
+            "id_equipo": ""
+        },
+        {
+            "id": "u003f1ee-6c54-4b01-90e6-d701748f1003",
+            "username": "operario3",
+            "email": "operario3@example.com",
+            "tipo": "operario",
+            "id_equipo": "c232f1ee-3d54-4c03-34c4-e403740f0333"
+        },
+        {
+            "id": "u004f1ee-6c54-4b01-90e6-d701748f1004",
+            "username": "jefe1",
+            "email": "jefe1@example.com",
+            "tipo": "jefeDeMina",
+            "id_equipo": "a230f1ee-1b34-4c01-12a2-c301740f0111"
+        },
+        {
+            "id": "u005f1ee-6c54-4b01-90e6-d701748f1005",
+            "username": "jefe2",
+            "email": "jefe2@example.com",
+            "tipo": "jefeDeMina",
+            "id_equipo": "b231f1ee-2c44-4c02-23b3-d302740f0222"
+        },
+        {
+            "id": "u006f1ee-6c54-4b01-90e6-d701748f1006",
+            "username": "jefe3",
+            "email": "jefe3@example.com",
+            "tipo": "jefeDeMina",
+            "id_equipo": "c232f1ee-3d54-4c03-34c4-e403740f0333"
+        }
+    ],
+    "actividad": [
+        {
+            "id": "a4f1ee-6c54-4b01-90e6-d701748f2004",
+            "id_equipo": "a230f1ee-1b34-4c01-12a2-c301740f0111",
+            "id_labor": "a040f1ee-6c54-4b01-90e6-d701748f0884",
+            "horaInicio": "2023-10-01T13:00:00",
+            "horaFin": "2023-10-01T17:00:00",
+            "horometro": 1349.6,
+            "id_operario": "u001f1ee-6c54-4b01-90e6-d701748f1001",
+            "id_jefe_mina": "u004f1ee-6c54-4b01-90e6-d701748f1004",
+            "id_mina": "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        },
+        {
+            "id": "a5f1ee-6c54-4b01-90e6-d701748f2005",
+            "id_equipo": "a230f1ee-1b34-4c01-12a2-c301740f0111",
+            "id_labor": "a050f1ee-6c54-4b01-90e6-d701748f0885",
+            "horaInicio": "2023-10-01T18:00:00",
+            "horaFin": "2023-10-01T22:00:00",
+            "horometro": 1353.6,
+            "id_operario": "u001f1ee-6c54-4b01-90e6-d701748f1001",
+            "id_jefe_mina": "u004f1ee-6c54-4b01-90e6-d701748f1004",
+            "id_mina": "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        },
+        {
+            "id": "a6f1ee-6c54-4b01-90e6-d701748f2006",
+            "id_equipo": "b231f1ee-2c44-4c02-23b3-d302740f0222",
+            "id_labor": "a060f1ee-6c54-4b01-90e6-d701748f0886",
+            "horaInicio": "2023-10-01T14:00:00",
+            "horaFin": "2023-10-01T18:00:00",
+            "horometro": 2460.3,
+            "id_operario": "u002f1ee-6c54-4b01-90e6-d701748f1002",
+            "id_jefe_mina": "u005f1ee-6c54-4b01-90e6-d701748f1005",
+            "id_mina": "e320f1ee-7a64-4c02-90f7-e801749f0862"
+        },
+        {
+            "id": "a7f1ee-6c54-4b01-90e6-d701748f2007",
+            "id_equipo": "b231f1ee-2c44-4c02-23b3-d302740f0222",
+            "id_labor": "a070f1ee-6c54-4b01-90e6-d701748f0887",
+            "horaInicio": "2023-10-01T19:00:00",
+            "horaFin": "2023-10-01T23:00:00",
+            "horometro": 2464.3,
+            "id_operario": "u002f1ee-6c54-4b01-90e6-d701748f1002",
+            "id_jefe_mina": "u005f1ee-6c54-4b01-90e6-d701748f1005",
+            "id_mina": "e320f1ee-7a64-4c02-90f7-e801749f0862"
+        },
+        {
+            "id": "a8f1ee-6c54-4b01-90e6-d701748f2008",
+            "id_equipo": "c232f1ee-3d54-4c03-34c4-e403740f0333",
+            "id_labor": "a010f1ee-6c54-4b01-90e6-d701748f0881",
+            "horaInicio": "2023-10-01T12:00:00",
+            "horaFin": "2023-10-01T16:00:00",
+            "horometro": 1874.4,
+            "id_operario": "u003f1ee-6c54-4b01-90e6-d701748f1003",
+            "id_jefe_mina": "u006f1ee-6c54-4b01-90e6-d701748f1006",
+            "id_mina": "f330f1ee-8b74-4d03-90f8-f901750f0873"
+        },
+        {
+            "id": "a9f1ee-6c54-4b01-90e6-d701748f2009",
+            "id_equipo": "c232f1ee-3d54-4c03-34c4-e403740f0333",
+            "id_labor": "a020f1ee-6c54-4b01-90e6-d701748f0882",
+            "horaInicio": "2023-10-01T17:00:00",
+            "horaFin": "2023-10-01T21:00:00",
+            "horometro": 1878.4,
+            "id_operario": "u003f1ee-6c54-4b01-90e6-d701748f1003",
+            "id_jefe_mina": "u006f1ee-6c54-4b01-90e6-d701748f1006",
+            "id_mina": "f330f1ee-8b74-4d03-90f8-f901750f0873"
+        }
+    ]
+}

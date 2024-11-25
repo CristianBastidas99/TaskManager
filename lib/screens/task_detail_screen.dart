@@ -1,7 +1,9 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:ui' as ui;
 import 'package:image_save/image_save.dart';
+import '../models/actividad.dart';
 import '../models/tarea.dart';
 import '../services/storage_service.dart';
 import 'dart:typed_data';
@@ -186,3 +188,4 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     );
   }
 }
+*/

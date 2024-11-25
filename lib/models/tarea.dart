@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
+import 'actividad.dart';
 
 class Tarea {
   String idTarea;
@@ -108,64 +108,5 @@ class Tarea {
       ubicacion: data['ubicacion'],
       notas: data['notas'],
     );
-  }
-}
-
-// Clase Actividad para las actividades de la tarea
-class Actividad {
-  String idActividad;
-  String descripcionActividad;
-  String estado;
-  String horaInicio;
-  String horaFin;
-  String duracion;
-  TextEditingController horaInicioController;
-  TextEditingController horaFinController;
-  TextEditingController duracionController;
-
-  Actividad({
-    required this.idActividad,
-    required this.descripcionActividad,
-    required this.estado,
-    required this.horaInicio,
-    required this.horaFin,
-    required this.duracion,
-  })  : horaInicioController = TextEditingController(),
-        horaFinController = TextEditingController(),
-        duracionController = TextEditingController();
-
-  // Método para serializar a Map para Firebase
-  Map<String, dynamic> toMap() {
-    return {
-      'id_actividad': idActividad,
-      'descripcion_actividad': descripcionActividad,
-      'estado': estado,
-      'hora_inicio': horaInicio,
-      'hora_fin': horaFin,
-      'duracion': duracion,
-    };
-  }
-
-  // Constructor desde Map (Firebase)
-  factory Actividad.fromMap(Map<String, dynamic> map) {
-    return Actividad(
-      idActividad: map['id_actividad'] ?? const Uuid().v4(),
-      descripcionActividad: map['descripcion_actividad'] ?? '',
-      estado: map['estado'] ?? "pendiente",
-      horaInicio: map['hora_inicio'] ?? '',
-      horaFin: map['hora_fin'] ?? '',
-      duracion: map['duracion'] ?? '',
-    );
-  }
-
-  String toJson() {
-    return jsonEncode({
-      'id_actividad': idActividad,
-      'descripcion_actividad': descripcionActividad,
-      'estado': estado,
-      'hora_inicio': horaInicio,
-      'hora_fin': horaFin,
-      'duracion': duracion,
-    });
   }
 }
