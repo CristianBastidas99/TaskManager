@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/equipo.dart';
+import '../models/usuario.dart';
 import '../services/storage_service.dart';
 import '../services/auth_service.dart';
 import '../utils/constants.dart';
@@ -28,7 +29,7 @@ class _EquipoSelectionScreenState extends State<EquipoSelectionScreen> {
           await StorageService().getLocalCollection('equipo');
       //print(fetchedEquipos);
       setState(() {
-        equipos = fetchedEquipos.values.skip(1).map((dynamic value) {
+        equipos = fetchedEquipos.map((dynamic value) {
           return Equipo.fromMap(value as Map<String, dynamic>);
         }).toList();
         isLoading = false;
@@ -42,8 +43,14 @@ class _EquipoSelectionScreenState extends State<EquipoSelectionScreen> {
     }
   }
 
-  void onEquipoSelected(Equipo equipo) {
-    Navigator.pushNamed(context, preFormularioRoute, arguments: equipo);
+  Future<void> onEquipoSelected(Equipo equipo) async {
+    Usuario? user = await StorageService().getConnectedUser();
+    if (user != null) {
+      user.idEquipo = equipo.id;
+      StorageService().saveData('usuario', user.id, user.toMap());
+      StorageService().saveConnectedUser(user);
+      Navigator.pushNamed(context, preFormularioRoute, arguments: equipo);
+    }
   }
 
   Future<void> signOut() async {

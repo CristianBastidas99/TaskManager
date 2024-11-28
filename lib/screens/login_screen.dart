@@ -76,6 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
           _errorMessage = 'Error al obtener usuario.';
           _isLoading = false;
         });
+        return;
       }
     } catch (e) {
       setState(() {

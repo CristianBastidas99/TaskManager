@@ -32,6 +32,7 @@ class AuthService {
   Future<void> logout() async {
     try {
       //await validateConexion();
+      storageService.deleteSettings();
       await _auth.signOut();
     } catch (e) {
       throw FirebaseAuthException(code: (e as FirebaseAuthException).code);

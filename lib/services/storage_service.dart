@@ -181,21 +181,19 @@ class StorageService<T> {
   }
 
   /// Devuelve una colección específica almacenada localmente como un Map.
-  Future<Map<String, dynamic>> getLocalCollection(String collection) async {
+  Future<List<dynamic>> getLocalCollection(String collection) async {
     final prefs = await SharedPreferences.getInstance();
     final List<String>? localData = prefs.getStringList('sync_$collection');
 
     if (localData == null || localData.isEmpty) {
-      return {}; // Retorna un Map vacío si no hay datos almacenados.
+      return []; // Retorna una lista vacía si no hay datos almacenados.
     }
 
-    // Convierte los datos de JSON a Map<String, dynamic>.
-    final Map<String, dynamic> collectionMap = {
-      for (var item in localData)
-        jsonDecode(item)['id']: jsonDecode(item) // Clave: ID del documento.
-    };
+    // Omite el primer valor de localData y retorna el resto como una lista dinámica.
+    final List<dynamic> collectionList =
+        localData.skip(1).map((item) => jsonDecode(item)).toList();
 
-    return collectionMap;
+    return collectionList;
   }
 
   /// Busca un documento por ID en una colección específica almacenada localmente.
@@ -241,6 +239,12 @@ class StorageService<T> {
     return null; // Retorna null si no se encuentra el usuario.
   }
 
+  /// Guarda un usuario localmente con la llave 'connected_user'.
+  Future<void> saveConnectedUser(Usuario user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('connected_user', jsonEncode(user.toJson()));
+  }
+
   /// Busca en la base de datos local a connected_user y lo cachea con el modelo Usuario.
   Future<Usuario?> getConnectedUser() async {
     if (_cachedConnectedUser != null) {
@@ -258,6 +262,37 @@ class StorageService<T> {
     return _cachedConnectedUser;
   }
 
+  /// Guarda los valores de idJefeMina, idMina e idLabor localmente con la llave 'settings'.
+  Future<void> saveSettings(
+      String idJefeMina, String idMina, String idLabor) async {
+    final prefs = await SharedPreferences.getInstance();
+    final Map<String, String> settings = {
+      'idJefeMina': idJefeMina,
+      'idMina': idMina,
+      'idLabor': idLabor,
+    };
+    await prefs.setString('settings', jsonEncode(settings));
+  }
+
+  /// Obtiene los valores de idJefeMina, idMina e idLabor almacenados localmente con la llave 'settings'.
+  Future<Map<String, String>?> getSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? settingsJson = prefs.getString('settings');
+
+    if (settingsJson == null) {
+      return null; // Retorna null si no hay datos de configuración.
+    }
+
+    final Map<String, dynamic> settingsMap = jsonDecode(settingsJson);
+    return settingsMap.map((key, value) => MapEntry(key, value as String));
+  }
+
+  /// Elimina los valores almacenados localmente con la llave 'settings'.
+  Future<void> deleteSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('settings');
+  }
+
   Future<Equipo?> getEquipoByQR(String qrData) async {
     // Parsear el JSON
     final jsonData = jsonDecode(qrData);
@@ -267,7 +302,7 @@ class StorageService<T> {
 
     final fetchedEquipos = await getLocalCollection('equipo');
 
-    for (var item in fetchedEquipos.values) {
+    for (var item in fetchedEquipos) {
       final equipo = Equipo.fromJson(item);
 
       // Comparar el ID del JSON con el ID del equipo

@@ -1,15 +1,17 @@
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'models/equipo.dart';
 import 'models/usuario.dart';
+import 'screens/splash_screen.dart';
 import 'utils/constants.dart';
 import 'services/storage_service.dart';
-import 'screens/error_screen.dart';
 
 // Importa tus pantallas
 import 'screens/login_screen.dart';
 import 'screens/equipo_selection_screen.dart';
 import 'screens/pre_formulario_screen.dart';
+import 'screens/actividades_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,57 +30,31 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: FutureBuilder<String>(
-        future: getInitialRoute(),  // Obtiene la ruta inicial dependiendo del usuario y equipo
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());  // Muestra una pantalla de carga
-          }
-
-          if (snapshot.hasError) {
-            return ErrorScreen();  // Si hay un error, muestra una pantalla de error
-          }
-
-          // Una vez que el Future ha terminado, navega a la ruta correspondiente
-          return Navigator(
-            onGenerateRoute: (settings) {
-              return MaterialPageRoute(
-                builder: (_) {
-                  if (snapshot.data == seleccionEquipoRoute) {
-                    return EquipoSelectionScreen();  // Si el usuario no tiene equipo, muestra la selección
-                  } else {
-                    return PreFormularioScreen(equipo: settings.arguments as Equipo);  // Si tiene equipo, muestra el formulario
-                  }
-                },
-              );
-            },
-          );
-        },
-      ),
+      home: SplashScreen(), // Cambia initialRoute por una pantalla inicial
       routes: {
         loginRoute: (context) => LoginScreen(),
         seleccionEquipoRoute: (context) => EquipoSelectionScreen(),
         preFormularioRoute: (context) => PreFormularioScreen(equipo: ModalRoute.of(context)!.settings.arguments as Equipo),
-        // Otras rutas que puedas tener...
+        actividadesRoute: (context) => ActividadesScreen(),
       },
     );
   }
 
-  Future<String> getInitialRoute() async {
-    // Aquí se realiza la validación para decidir la ruta
+  Future<void> checkUserAndNavigate(BuildContext context) async {
     StorageService storageService = StorageService();
     Usuario? usuario = await storageService.getConnectedUser();
     if (usuario != null) {
-      if (usuario.idEquipo.isNotEmpty) {
+      print(usuario.toMap());
+      if (usuario.idEquipo != '') {
         Map<String, dynamic>? equipoData =
             await storageService.getDocumentById('equipo', usuario.idEquipo);
         if (equipoData != null) {
           Equipo equipo = Equipo.fromMap(equipoData);
-          return preFormularioRoute;  // Si el usuario tiene equipo, redirige a la pantalla de formulario
+          Navigator.pushNamed(context, preFormularioRoute, arguments: equipo);
         }
+      } else {
+        Navigator.pushReplacementNamed(context, seleccionEquipoRoute);
       }
-      return seleccionEquipoRoute;  // Si el usuario no tiene equipo, redirige a la selección de equipo
     }
-    return loginRoute;  // Si no hay usuario autenticado, redirige a la pantalla de login
   }
 }
