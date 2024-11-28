@@ -1,8 +1,11 @@
+import 'package:app_tareas_conectividad_limitada/models/equipo.dart';
+import 'package:app_tareas_conectividad_limitada/models/usuario.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../utils/validators.dart';
 import '../utils/constants.dart';
+import '../services/storage_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,8 +16,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final AuthService _authService = AuthService();
-  final TextEditingController _emailController =
-      TextEditingController(text: 'operario3@example.com ');
+  final StorageService _storageService = StorageService();
+  final TextEditingController _usernameController =
+      TextEditingController(text: 'operario3');
   final TextEditingController _passwordController =
       TextEditingController(text: '123456');
   bool _isLoading = false;
@@ -22,10 +26,10 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscureText = true;
 
   Future<void> _login() async {
-    final email = _emailController.text.trim();
+    final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (!Validators.validateEmail(email)) {
+    if (!Validators.validateUsername(username)) {
       setState(() {
         _errorMessage = 'Correo electrónico inválido.';
       });
@@ -38,6 +42,15 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    final email = await _storageService.getEmailAndSaveConnectedUser(username);
+
+    if (email == null) {
+      setState(() {
+        _errorMessage = 'Usuario no encontrado.';
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -45,10 +58,29 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       await _authService.login(email, password);
-      Navigator.pushReplacementNamed(context, dashboardRoute);
+      Usuario? usuario = await _storageService.getConnectedUser();
+      if (usuario != null) {
+        print(usuario.toMap());
+        if (usuario.idEquipo != '') {
+          Map<String, dynamic>? equipoData =
+              await _storageService.getDocumentById('equipo', usuario.idEquipo);
+          if (equipoData != null) {
+            Equipo equipo = Equipo.fromMap(equipoData);
+            Navigator.pushNamed(context, preFormularioRoute, arguments: equipo);
+          }
+        } else {
+          Navigator.pushReplacementNamed(context, seleccionEquipoRoute);
+        }
+      } else {
+        setState(() {
+          _errorMessage = 'Error al obtener usuario.';
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
-        _errorMessage = _authService.mapFirebaseError((e as FirebaseAuthException).code);
+        _errorMessage =
+            _authService.mapFirebaseError((e as FirebaseAuthException).code);
         _isLoading = false;
       });
     }
@@ -57,9 +89,15 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Iniciar Sesión')),
+      appBar: AppBar(
+        title: const Text(
+          'Iniciar Sesión',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Center(
           child: SingleChildScrollView(
             child: Form(
@@ -68,61 +106,96 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const Text(
                     welcomeMessage,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Correo electrónico',
-                      border: OutlineInputBorder(),
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
                     ),
-                    keyboardType: TextInputType.emailAddress,
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: InputDecoration(
-                      labelText: 'Contraseña',
-                      border: const OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureText
-                              ? Icons.visibility
-                              : Icons.visibility_off,
+                  const SizedBox(height: 30),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _obscureText = !_obscureText;
-                          });
-                        },
-                      ),
+                      ],
                     ),
-                    obscureText: _obscureText,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _usernameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Nombre de usuario',
+                            prefixIcon: Icon(Icons.person),
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                            ),
+                          ),
+                          keyboardType: TextInputType.text,
+                        ),
+                        const SizedBox(height: 15),
+                        TextFormField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            labelText: 'Contraseña',
+                            prefixIcon: const Icon(Icons.lock),
+                            border: const OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureText
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscureText = !_obscureText;
+                                });
+                              },
+                            ),
+                          ),
+                          obscureText: _obscureText,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 25),
                   _isLoading
                       ? const CircularProgressIndicator()
                       : ElevatedButton(
                           onPressed: _login,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue, // Background color
-                            foregroundColor: Colors.white, // Text color
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 30, vertical: 15),
+                                horizontal: 40, vertical: 15),
                             textStyle: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
+                            elevation: 5,
                           ),
                           child: const Text('Iniciar sesión'),
                         ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 15),
                   if (_errorMessage != null)
                     Text(
                       _errorMessage!,
-                      style: const TextStyle(color: Colors.red),
+                      style: const TextStyle(color: Colors.red, fontSize: 14),
+                      textAlign: TextAlign.center,
                     ),
                 ],
               ),
@@ -130,12 +203,13 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
+      backgroundColor: Colors.grey.shade100,
     );
   }
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }

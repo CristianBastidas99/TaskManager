@@ -60,4 +60,28 @@ class Usuario {
   String toJson() {
     return jsonEncode(toMap());
   }
+
+  factory Usuario.fromJson(String source) {
+    return Usuario.fromMap(jsonDecode(source));
+  }
+
+
+  String get getId => id;
+  set setId(String id) => this.id = id;
+
+  String get getUsername => username;
+  set setUsername(String username) => this.username = username;
+
+  String get getEmail => email;
+  set setEmail(String email) => this.email = email;
+
+  TipoUsuario get getTipo => tipo;
+  set setTipo(TipoUsuario tipo) => this.tipo = tipo;
+
+  String get getIdEquipo => idEquipo;
+  set setIdEquipo(String idEquipo) => this.idEquipo = idEquipo;
+
+  EstadoSincronizacion get getEstadoSincronizacion => estadoSincronizacion;
+  set setEstadoSincronizacion(EstadoSincronizacion estadoSincronizacion) =>
+      this.estadoSincronizacion = estadoSincronizacion;
 }

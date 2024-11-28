@@ -1,48 +1,34 @@
+# TaskManager
 
-# TaskManager - Aplicación de Gestión de Tareas
-
-## Descripción
-TaskManager es una aplicación móvil de gestión de tareas desarrollada en Flutter, pensada para facilitar el seguimiento de actividades programadas. Su diseño optimizado permite que funcione en entornos con baja conectividad, brindando opciones de uso offline y sincronización automática con Firebase. Con funciones como autenticación segura, escaneo de QR para cargar formularios específicos, y exportación de datos en Excel, TaskManager es ideal para equipos en campo y usuarios que requieren control preciso de sus actividades.
+TaskManager es una aplicación móvil desarrollada en **Flutter** diseñada para gestionar actividades diarias en entornos mineros e industriales. Permite a los operarios y jefes de mina organizar tareas, seleccionar equipos, registrar actividades y monitorear el progreso de manera eficiente.
 
 ## Características Principales
-1. **Autenticación (Firebase)**  
-   - Sistema de autenticación usando Firebase Authentication.
-   - Credenciales de prueba:
-     - **Usuario:** `codeaunitest`
-     - **Contraseña:** `Codea123test`
 
-2. **Escaneo de QR**  
-   - Escaneo de códigos QR para:
-     - Cargar automáticamente un formulario de tareas asociado al código.
-     - Permitir la selección manual de un formulario en caso de QR inválido o inexistente.
-   - Soporte offline, almacenando el formulario para su carga cuando se restablezca la conectividad.
+- **Inicio de Sesión**: Acceso seguro para operarios y jefes de mina.
+- **Gestión de Equipos**: Selección y registro de equipos, con soporte para escaneo de códigos QR.
+- **Registro de Actividades**: Formulario dinámico que ajusta horarios, labores y horómetros según las necesidades.
+- **Persistencia Local**: Almacena los datos en una base de datos local, ideal para entornos con conectividad limitada.
+- **Interfaz Intuitiva**: Diseño limpio y fácil de usar, optimizado para la gestión de tareas en campo.
 
-3. **Formulario de Tareas**  
-   - Pantalla dedicada para registrar y gestionar actividades:
-     - Campos para ingresar hora de inicio y fin de cada actividad.
-     - Sincronización con Firebase Firestore, almacenando datos y actualizándolos automáticamente cuando hay conexión.
-   - Uso offline: Los datos se guardan en el dispositivo hasta que se detecte conexión.
+## Beneficios
 
-4. **Exportación de Datos**  
-   - Exportación de los formularios de tareas en formato Excel para generar reportes.
-   - Sincronización en segundo plano, guardando los archivos localmente cuando no hay conexión.
+- **Organización**: Centraliza la gestión de equipos y actividades diarias.
+- **Eficiencia**: Automatiza validaciones y ajustes en horarios y recursos.
+- **Flexibilidad**: Funciona sin conexión a internet gracias a la base de datos local.
+- **Fiabilidad**: Integra un sistema robusto para evitar errores en el registro de datos.
 
-5. **Optimización para Entornos de Baja Conectividad**  
-   - Implementación de almacenamiento en caché y manejo de datos offline.
-   - Sincronización automática y asincrónica para garantizar que los datos están actualizados en cuanto haya conexión.
+## Requisitos Previos
 
-## Requisitos del Proyecto
-- **Flutter SDK**: Versión >= 3.0.0
-- **Firebase Console**: Configurado para Firebase Authentication y Firestore
-- **Herramientas de Desarrollo**: Android Studio o Visual Studio Code (opcional para desarrollo)
-- **Dispositivo o Emulador Android**: Para probar el APK
+- Tener instalado **Flutter 3.24.4** o superior.
+- Entorno configurado con **Dart 3.5.4**.
+- Dispositivo físico o emulador para pruebas.
 
 ## Instalación y Configuración
 Para clonar y ejecutar esta aplicación localmente, sigue estos pasos:
 
 1. Clona este repositorio:
    ```bash
-   git clone https://github.com/usuario/taskmanager-flutter.git
+   git clone https://github.com/CristianBastidas99/TaskManager.git
    cd taskmanager-flutter
    ```
 
@@ -56,43 +42,22 @@ Para clonar y ejecutar esta aplicación localmente, sigue estos pasos:
    flutter run
    ```
 
+## Cómo Usar TaskManager
+
+1. Inicia sesión con un usuario predefinido.
+2. Selecciona un equipo desde la lista o escanea su código QR.
+3. Completa el formulario previo, seleccionando la mina, el jefe y la labor a realizar.
+4. Registra las actividades diarias, validando horarios y horómetros.
+5. Consulta los detalles de los equipos y actividades en tiempo real.
+
+## Tecnologías Utilizadas
+
+- **Flutter**: Framework para desarrollo móvil.
+- **Base de Datos Local**: Para almacenamiento offline.
+- **Integración QR**: Escaneo de equipos mediante códigos QR.
+
 ### Acceso al APK en GitHub
 También puedes encontrar el APK en la sección [Releases](https://github.com/CristianBastidas99/TaskManager/releases) del repositorio. Aquí se cargará una nueva versión del APK cada vez que se actualice la aplicación.
-
-## Estructura de Almacenamiento en Firebase Firestore
-Los formularios de tareas se almacenan en la colección `formularios_tareas` dentro de Firebase Firestore, utilizando la siguiente estructura de datos para organizar y sincronizar las actividades:
-
-```plaintext
-Colección: formularios_tareas
-   Documento: <ID de Tarea>
-      - id_tarea: <UUID único de la tarea>
-      - nombre_tarea: "Inspección de equipo"
-      - estado_sincronización: "pendiente" (indica si ya se ha sincronizado)
-      - fecha_creacion: <Timestamp>
-      - ultima_actualizacion: <Timestamp>
-      - usuario_creador: "codeaunitest"
-      - actividades: [
-            {
-               id_actividad: <UUID único de la actividad>,
-               descripcion_actividad: "Revisión de cables",
-               estado: "completada",
-               hora_inicio: "08:30",
-               hora_fin: "09:00",
-               duracion: "30 mins"
-            },
-            {
-               id_actividad: <UUID>,
-               descripcion_actividad: "Inspección de conexiones",
-               estado: "pendiente",
-               hora_inicio: "09:00",
-               hora_fin: "09:30",
-               duracion: "30 mins"
-            },
-            ...
-      ]
-      - ubicacion: "Planta A" (opcional)
-      - notas: "Revisar nuevamente en 3 meses"
-```
 
 ## Modo Offline y Sincronización Automática
 - **Modo Offline**: Al no haber conexión, los formularios se guardan en una base de datos local (por ejemplo, SQLite o almacenamiento local de Firebase).
@@ -100,7 +65,7 @@ Colección: formularios_tareas
 - **Gestión de Conflictos**: Los campos `ultima_actualizacion` y las Firebase Firestore Rules ayudan a resolver conflictos de versiones en caso de cambios simultáneos.
 
 ## Exportación de Datos en Excel
-Los formularios completados pueden exportarse en formato Excel para facilitar el reporte y análisis de tareas:
+Los formularios completados pueden exportarse en formato Excel para facilitar el reporte y análisis de actividades:
 
 1. **Exportación**: Los datos se exportan a un archivo Excel cuando se selecciona la opción en la aplicación.
 2. **Sincronización Offline**: Si no hay conexión, el archivo se guarda localmente y se sincroniza en segundo plano al restablecer la conexión.

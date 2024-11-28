@@ -49,4 +49,8 @@ class Equipo {
   String toJson() {
     return jsonEncode(toMap());
   }
+
+  factory Equipo.fromJson(String source) {
+    return Equipo.fromMap(jsonDecode(source));
+  }
 }

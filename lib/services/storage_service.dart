@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import '../models/equipo.dart';
+import '../models/usuario.dart';
 import 'dart:convert';
 
 /// Servicio de almacenamiento que soporta sincronización entre datos locales y en línea.
@@ -10,6 +12,8 @@ class StorageService<T> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final collections = ['actividad', 'equipo', 'labor', 'mina', 'usuario'];
   bool _isOnline = false; // Estado de conectividad
+  /// Modelo de usuario para almacenar los datos del usuario conectado.
+  Usuario? _cachedConnectedUser;
 
   /// Constructor que inicializa el servicio y verifica la conectividad.
   StorageService() {
@@ -215,8 +219,8 @@ class StorageService<T> {
     return null; // Retorna null si no se encuentra el documento.
   }
 
-  /// Busca un usuario por email en la colección 'usuario' almacenada localmente.
-  Future<Map<String, dynamic>?> getUserByEmail(String email) async {
+  /// Busca el email de un usuario por su username, lo guarda en 'connected_user' y devuelve el email.
+  Future<String?> getEmailAndSaveConnectedUser(String username) async {
     final prefs = await SharedPreferences.getInstance();
     final List<String>? localData = prefs.getStringList('sync_usuario');
 
@@ -224,15 +228,55 @@ class StorageService<T> {
       return null; // Retorna null si no hay datos en la colección.
     }
 
-    // Busca el usuario por email.
+    // Busca el usuario por username.
     for (var item in localData) {
       final data = jsonDecode(item);
-      if (data['email'] == email) {
-        return data; // Retorna el usuario si coincide el email.
+      if (data['username'] == username) {
+        // Guarda el usuario en la colección 'connected_user'.
+        await prefs.setString('connected_user', jsonEncode(data));
+        return data['email']; // Retorna el email si coincide el username.
       }
     }
 
     return null; // Retorna null si no se encuentra el usuario.
+  }
+
+  /// Busca en la base de datos local a connected_user y lo cachea con el modelo Usuario.
+  Future<Usuario?> getConnectedUser() async {
+    if (_cachedConnectedUser != null) {
+      return _cachedConnectedUser; // Retorna el usuario cacheado si existe.
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final String? userJson = prefs.getString('connected_user');
+
+    if (userJson == null) {
+      return null; // Retorna null si no hay usuario conectado.
+    }
+
+    _cachedConnectedUser = Usuario.fromJson(userJson); // Cachea el usuario.
+    return _cachedConnectedUser;
+  }
+
+  Future<Equipo?> getEquipoByQR(String qrData) async {
+    // Parsear el JSON
+    final jsonData = jsonDecode(qrData);
+
+    // Extraer el ID del JSON
+    final qrId = jsonData['id'] as String;
+
+    final fetchedEquipos = await getLocalCollection('equipo');
+
+    for (var item in fetchedEquipos.values) {
+      final equipo = Equipo.fromJson(item);
+
+      // Comparar el ID del JSON con el ID del equipo
+      if (equipo.id == qrId) {
+        return equipo;
+      }
+    }
+
+    return null;
   }
 
   /// Guarda los datos tanto localmente como en Firestore, dependiendo del estado de conectividad.
