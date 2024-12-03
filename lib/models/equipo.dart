@@ -53,4 +53,20 @@ class Equipo {
   factory Equipo.fromJson(String source) {
     return Equipo.fromMap(jsonDecode(source));
   }
+
+  // Getters
+  String get getId => id;
+  String get getNombre => nombre;
+  String get getIdMina => idMina;
+  List<String> get getSubEquipos => subEquipos;
+  double get getHorometro => horometro;
+  EstadoSincronizacion get getEstadoSincronizacion => estadoSincronizacion;
+
+  // Setters
+  set setId(String id) => this.id = id;
+  set setNombre(String nombre) => this.nombre = nombre;
+  set setIdMina(String idMina) => this.idMina = idMina;
+  set setSubEquipos(List<String> subEquipos) => this.subEquipos = subEquipos;
+  set setHorometro(double horometro) => this.horometro = horometro;
+  set setEstadoSincronizacion(EstadoSincronizacion estadoSincronizacion) => this.estadoSincronizacion = estadoSincronizacion;
 }

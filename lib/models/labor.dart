@@ -37,4 +37,22 @@ class Labor {
   String toJson() {
     return jsonEncode(toMap());
   }
+
+  // Getters
+  String get getId => id;
+  String get getNombre => nombre;
+  EstadoSincronizacion get getEstadoSincronizacion => estadoSincronizacion;
+
+  // Setters
+  set setId(String id) {
+    this.id = id;
+  }
+
+  set setNombre(String nombre) {
+    this.nombre = nombre;
+  }
+
+  set setEstadoSincronizacion(EstadoSincronizacion estadoSincronizacion) {
+    this.estadoSincronizacion = estadoSincronizacion;
+  }
 }

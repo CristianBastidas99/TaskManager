@@ -95,6 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
           'Iniciar Sesión',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        automaticallyImplyLeading: false,
         centerTitle: true,
       ),
       body: Padding(
