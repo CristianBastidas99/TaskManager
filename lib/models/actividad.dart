@@ -35,6 +35,32 @@ class Actividad {
             TextEditingController(text: horaInicio.toString()),
         horaFinController = TextEditingController(text: horaFin.toString());
 
+  // Constructor con valores automáticos
+  Actividad.automatic({
+    String? id,
+    String? idEquipo,
+    String? idLabor,
+    String? idMina,
+    DateTime? horaInicio,
+    DateTime? horaFin,
+    double? horometro,
+    String? idOperario,
+    String? idJefeMina,
+    EstadoSincronizacion? estadoSincronizacion,
+  })  : id = id ?? const Uuid().v4(),
+        idEquipo = idEquipo ?? 'defaultEquipo',
+        idLabor = idLabor ?? 'defaultLabor',
+        idMina = idMina ?? 'defaultMina',
+        horaInicio = horaInicio ?? DateTime.now(),
+        horaFin = horaFin ?? DateTime.now().add(Duration(hours: 1)),
+        horometro = horometro ?? 0.0,
+        idOperario = idOperario ?? 'defaultOperario',
+        idJefeMina = idJefeMina ?? 'defaultJefeMina',
+        estadoSincronizacion = estadoSincronizacion ?? EstadoSincronizacion.pendiente,
+        horometroController = TextEditingController(text: (horometro ?? 0.0).toString()),
+        horaInicioController = TextEditingController(text: (horaInicio ?? DateTime.now()).toString()),
+        horaFinController = TextEditingController(text: (horaFin ?? DateTime.now().add(Duration(hours: 1))).toString());
+
   // Método para serializar a Map para Firebase
   Map<String, dynamic> toMap() {
     return {

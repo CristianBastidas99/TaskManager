@@ -1,6 +1,7 @@
 import 'package:app_tareas_conectividad_limitada/models/equipo.dart';
 import 'package:app_tareas_conectividad_limitada/models/usuario.dart';
 import 'package:flutter/material.dart';
+
 import '../models/actividad.dart';
 import '../models/labor.dart';
 import '../services/auth_service.dart';
@@ -21,10 +22,14 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
   Labor? selectedLabor;
   DateTime selectedStartTime = DateTime.now();
   DateTime selectedEndTime = DateTime.now().add(const Duration(hours: 1));
+  double selectedHorometro = 0.0;
+  bool showHorometroField = false;
   bool isLoading = true;
   Usuario? connectedUser;
   Equipo? selectedEquipo;
+  Actividad actividad = Actividad.automatic();
   Map<String, dynamic> settings = {};
+  DateTime horaBase = DateTime.now();
 
   @override
   void initState() {
@@ -93,10 +98,28 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
         labores.clear();
         labores.addAll(laborMap.values);
 
-        selectedLabor = labores.firstWhere(
-          (labor) => labor.getId == settings['idLabor']
-        );
+        selectedLabor =
+            labores.firstWhere((labor) => labor.getId == settings['idLabor']);
 
+        if (actividades.isNotEmpty) {
+          final latestActividad = actividades
+              .reduce((a, b) => a.horaFin.isAfter(b.horaFin) ? a : b);
+          if (latestActividad.horaFin.isAfter(DateTime.now())) {
+            horaBase = latestActividad.horaFin;
+          } else {
+            horaBase = DateTime.now();
+          }
+        } else {
+          horaBase = DateTime.now();
+        }
+
+        actividad.horaInicio = horaBase;
+        actividad.horaFin = horaBase.add(const Duration(hours: 1));
+        actividad.horaInicioController.text =
+            _formatTo12Hours(actividad.horaInicio);
+        actividad.horaFinController.text = _formatTo12Hours(actividad.horaFin);
+
+        selectedHorometro = 0.0;
         isLoading = false;
       });
     } catch (e) {
@@ -123,6 +146,14 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
   }
 
   void _showCreateActivityModal(BuildContext context) {
+    bool showHorometroField = false;
+    final TextEditingController horometroController = TextEditingController();
+    @override
+    void dispose() {
+      actividad.horaInicioController.dispose();
+      actividad.horaFinController.dispose();
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -130,70 +161,106 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            top: 16,
-            left: 16,
-            right: 16,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButtonFormField<Labor>(
-                decoration: const InputDecoration(
-                  labelText: 'Selecciona una labor',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                  ),
-                ),
-                value: selectedLabor,
-                items: labores.map((labor) {
-                  return DropdownMenuItem<Labor>(
-                    value: labor,
-                    child: Text(labor.nombre),
-                  );
-                }).toList(),
-                onChanged: (value) => setState(() => selectedLabor = value),
+        return StatefulBuilder(
+          builder: (context, modalSetState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                top: 16,
+                left: 16,
+                right: 16,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
               ),
-              const SizedBox(height: 16),
-              Row(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => _selectTime(context, true),
-                      child: const Text('Hora de Inicio'),
+                  DropdownButtonFormField<Labor>(
+                    decoration: const InputDecoration(
+                      labelText: 'Selecciona una labor',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                      ),
+                    ),
+                    value: selectedLabor,
+                    items: labores.map((labor) {
+                      return DropdownMenuItem<Labor>(
+                        value: labor,
+                        child: Text(labor.nombre),
+                      );
+                    }).toList(),
+                    onChanged: (value) => setState(() => selectedLabor = value),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: actividad.horaInicioController,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: 'Hora de Inicio',
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.access_time),
+                        onPressed: () => _selectTime(context, true),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => _selectTime(context, false),
-                      child: const Text('Hora de Fin'),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: actividad.horaFinController,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: 'Hora de Fin',
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.access_time),
+                        onPressed: () => _selectTime(context, false),
+                      ),
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  CheckboxListTile(
+                    title: const Text('Añadir horómetro'),
+                    value: showHorometroField,
+                    onChanged: (value) {
+                      modalSetState(() {
+                        showHorometroField = value ?? false;
+                      });
+                    },
+                  ),
+                  if (showHorometroField)
+                    TextFormField(
+                      controller: horometroController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      decoration: const InputDecoration(
+                        labelText: 'Horómetro',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      final horometro = showHorometroField
+                          ? double.tryParse(horometroController.text) ?? 0.0
+                          : 0.0;
+                      selectedHorometro = horometro;
+                      _addActivity(); // Ajustamos el método
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 32),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    child: const Text('Agregar Actividad'),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _addActivity,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  textStyle: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                child: const Text('Agregar Actividad'),
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -207,13 +274,20 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
         idMina: settings['idMina'],
         horaInicio: selectedStartTime,
         horaFin: selectedEndTime,
-        horometro: 0.0,
+        horometro: selectedHorometro,
         idOperario: connectedUser!.getId,
         idJefeMina: settings['idJefeMina'],
       );
 
       await StorageService()
           .saveData('actividad', actividad.getId, actividad.toMap());
+      if (selectedHorometro != 0) {
+        selectedEquipo!.horometro = selectedHorometro;
+        await StorageService()
+            .saveData('equipo', selectedEquipo!.getId, selectedEquipo!.toMap());
+      }
+			settings['idLabor'] = selectedLabor!.id;
+			await StorageService().saveSettingsMap(settings);
       _loadData();
       Navigator.pop(context);
     } else {
@@ -232,21 +306,70 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
     );
     if (pickedTime != null) {
       setState(() {
-        final now = DateTime.now();
-        final newTime = DateTime(
-          now.year,
-          now.month,
-          now.day,
-          pickedTime.hour,
-          pickedTime.minute,
-        );
         if (isStartTime) {
+          DateTime newTime = DateTime(
+            horaBase.year,
+            horaBase.month,
+            horaBase.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+          if (newTime.isBefore(horaBase)) {
+            _showCustomDialog('Hora de inicio inválida',
+                'La hora de inicio debe ser mayor o igual a ${horaBase.toLocal().toString().split(' ')[0]} ${_formatTo12Hours(horaBase)}');
+            return;
+          }
+          if (newTime.isBefore(horaBase)) {
+            newTime = newTime.add(const Duration(days: 1));
+          }
           selectedStartTime = newTime;
+          actividad.horaInicioController.text = _formatTo12Hours(newTime);
         } else {
+          DateTime newTime = DateTime(
+            selectedStartTime.year,
+            selectedStartTime.month,
+            selectedStartTime.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+          if (newTime.isBefore(selectedStartTime)) {
+            _showCustomDialog('Hora de fin inválida',
+                'La hora de fin debe ser mayor que ${selectedStartTime.toLocal().toString().split(' ')[0]} ${_formatTo12Hours(selectedStartTime)}');
+            return;
+          }
+          if (newTime.isBefore(selectedStartTime)) {
+            newTime = newTime.add(const Duration(days: 1));
+          }
+          if (newTime.difference(selectedStartTime).inHours > 12) {
+						_showCustomDialog('Hora de fin inválida',
+                'La hora de fin no debe superar las 12 horas desde ${selectedStartTime.toLocal().toString().split(' ')[0]} ${_formatTo12Hours(selectedStartTime)}');
+            return;
+          }
           selectedEndTime = newTime;
+          actividad.horaFinController.text = _formatTo12Hours(newTime);
         }
       });
     }
+  }
+
+  void _showCustomDialog(String title, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Aceptar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> signOut() async {

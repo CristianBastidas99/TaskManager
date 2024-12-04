@@ -1,10 +1,12 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/equipo.dart';
 import '../models/usuario.dart';
-import 'dart:convert';
 
 /// Servicio de almacenamiento que soporta sincronización entre datos locales y en línea.
 /// Utiliza Firebase Firestore para almacenamiento en línea y SharedPreferences para almacenamiento local.
@@ -271,6 +273,12 @@ class StorageService<T> {
       'idMina': idMina,
       'idLabor': idLabor,
     };
+    await prefs.setString('settings', jsonEncode(settings));
+  }
+
+  /// Guarda los valores de configuración localmente con la llave 'settings'.
+  Future<void> saveSettingsMap(Map<String, dynamic> settings) async {
+    final prefs = await SharedPreferences.getInstance();
     await prefs.setString('settings', jsonEncode(settings));
   }
 
